@@ -14,11 +14,9 @@
 		var key;
 		var val1;
 		var val2;
-		var res;
 
-		// make a copy of obj1 so we're not overwriting original values.
+		// TODO: make a copy of obj1 so we're not overwriting original values.
 		// like prototype.options_ and all sub options objects
-		res = {};
 
 		for (key in obj2) {
 			if (obj2.hasOwnProperty(key)) {
@@ -83,6 +81,9 @@
 		this.mediaPlayer_.startup();
 		this.mediaPlayer_.attachView(this.el_);
 
+		// Turn off debug on the console
+		this.mediaPlayer_.debug.setLogToBrowserConsole(false);
+
 		// Dash.js autoplays by default
 		if (!options.autoplay) {
 			this.mediaPlayer_.setAutoPlay(false);
@@ -90,6 +91,9 @@
 
 		// Fetches and parses the manifest - WARNING the callback is non-standard "error-last" style
 		this.mediaPlayer_.retrieveManifest(manifestSource, videojs.bind(this, this.initializeDashJS));
+
+		// Expose DASH player
+		this.tech_.mediaPlayer_ = this.mediaPlayer_;
 	}
 
 	Html5DashJS.prototype.initializeDashJS = function (manifest, err) {
@@ -206,7 +210,8 @@
 
 	// Only add the SourceHandler if the browser supports MediaSourceExtensions
 	if (Boolean(window.MediaSource)) {
-		videojs.Html5.registerSourceHandler({
+		var html5 = videojs.getComponent('Html5');
+		html5.registerSourceHandler({
 			canHandleSource: function (source) {
 				var dashTypeRE = /^application\/dash\+xml/i;
 				var dashExtRE = /\.mpd/i;
